@@ -8,3 +8,6 @@ a branch test
 branch test again 
 
 this is the 4th change 
+
+auto commit and push ? 
+
