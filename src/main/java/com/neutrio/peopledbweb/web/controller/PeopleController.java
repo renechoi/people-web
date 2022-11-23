@@ -1,6 +1,7 @@
 package com.neutrio.peopledbweb.web.controller;
 
 import com.neutrio.peopledbweb.biz.model.Person;
+import com.neutrio.peopledbweb.data.FileStorageRepository;
 import com.neutrio.peopledbweb.data.PersonRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,9 +21,12 @@ import java.util.Optional;
 public class PeopleController {
 
     private final PersonRepository personRepository;
+    private FileStorageRepository fileStorageRepository;
 
-    private PeopleController(PersonRepository personRepository){
+    private PeopleController(PersonRepository personRepository,
+                                FileStorageRepository fileStorageRepository){
         this.personRepository = personRepository;
+        this.fileStorageRepository =fileStorageRepository;
     }
 
     @ModelAttribute("people")
@@ -41,12 +46,13 @@ public class PeopleController {
     }
 
     @PostMapping
-    public String savePerson(@Valid Person person, Errors errors, @RequestParam MultipartFile photoFilename){
+    public String savePerson(@Valid Person person, Errors errors, @RequestParam("photoFilename") MultipartFile photoFile) throws IOException {
         log.info(person);
-        log.info("Filename " + photoFilename.getOriginalFilename());
-        log.info("File size " + photoFilename.getSize());
+        log.info("Filename " + photoFile.getOriginalFilename());
+        log.info("File size " + photoFile.getSize());
         log.info("Errors " + errors);
         if (!errors.hasErrors()) {
+            fileStorageRepository.save(photoFile.getOriginalFilename(), photoFile.getInputStream());
             personRepository.save(person);
             return "redirect:people";
         }
