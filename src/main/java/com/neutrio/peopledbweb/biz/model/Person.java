@@ -38,6 +38,8 @@ public class Person {
     @NotNull(message = "Salary must not be empty")
     private BigDecimal salary;
 
+    private String photoFilename;
+
 
     public String getFormattedDOB(){
         return DateTimeFormatter.ofPattern("MMMM dd, yyyy").format(dob);
