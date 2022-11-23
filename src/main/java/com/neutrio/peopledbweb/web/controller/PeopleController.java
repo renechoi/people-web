@@ -3,6 +3,7 @@ package com.neutrio.peopledbweb.web.controller;
 import com.neutrio.peopledbweb.biz.model.Person;
 import com.neutrio.peopledbweb.data.FileStorageRepository;
 import com.neutrio.peopledbweb.data.PersonRepository;
+import com.neutrio.peopledbweb.exception.StorageException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -68,11 +69,20 @@ public class PeopleController {
         log.info("File size " + photoFile.getSize());
         log.info("Errors " + errors);
         if (!errors.hasErrors()) {
-            fileStorageRepository.save(photoFile.getOriginalFilename(), photoFile.getInputStream());
-            personRepository.save(person);
-            return "redirect:people";
+            try {
+                fileStorageRepository.save(photoFile.getOriginalFilename(), photoFile.getInputStream());
+                personRepository.save(person);
+                return "redirect:people";
+            } catch (StorageException e) {
+                return "people";
+            }
         }
         return "people";
+    }
+
+    @ExceptionHandler(StorageException.class)
+    public String handleException(){
+        return null;
     }
 
     @PostMapping(params="delete=true")
